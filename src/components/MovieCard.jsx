@@ -1,4 +1,5 @@
 import React from 'react'
+import StarRating from './StarRating'
 
 const MovieCard = ({watched}) => {
   return (
@@ -20,7 +21,9 @@ const MovieCard = ({watched}) => {
                         <span>⏳</span>
                         <span>{movie.runtime} min</span>
                       </p>
+                     
                     </div>
+                    {/* <StarRating /> */}
                   </li>
                 ))}
               </ul>

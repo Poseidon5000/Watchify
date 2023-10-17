@@ -1,11 +1,11 @@
-import React, {useState} from 'react'
+import React from 'react'
 
-const Navbar = ({movies, setMovies}) => {
-    const [query, setQuery] = useState("");
+const Navbar = ({movies, setMovies, query, setQuery}) => {
+   
   return (
     <nav className="nav-bar">
     <div className="logo">
-      <span role="img">🎥</span>
+      <span role="img">🎬</span>
       <h1>WATCHIFY</h1>
     </div>
     <input
@@ -16,7 +16,7 @@ const Navbar = ({movies, setMovies}) => {
       onChange={(e) => setQuery(e.target.value)}
     />
     <p className="num-results">
-      Found <strong>{movies.length}</strong> results
+      Found <strong>{movies?.length}</strong> results
     </p>
   </nav>
   )

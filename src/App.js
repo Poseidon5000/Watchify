@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import MovieList from "./components/MovieList";
 import MoviesInfo from "./components/MoviesInfo";
 import MovieSummary from "./components/MovieSummary";
 import MovieCard from "./components/MovieCard";
+import Loading from "./components/Loading";
+import Errorpage from "./components/Errorpage";
 const tempMovieData = [
   {
     imdbID: "tt1375666",
@@ -51,15 +53,72 @@ const tempWatchedData = [
   },
 ];
 
+// const querys = "avatar";
+
 function App() {
   const [movies, setMovies] = useState(tempMovieData);
   const [watched, setWatched] = useState(tempWatchedData);
+  const [query, setQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(
+    function () {
+      async function fetchData() {
+      try {
+        if (query.length < 3){
+          setMovies(tempMovieData);
+      
+
+          return;
+        }
+        setError("");
+          setIsLoading(true);
+          const request = await fetch(
+            `http://www.omdbapi.com/?s=${query}&apikey=c7015181`
+          );
+
+          if (!request.ok)
+            throw new Error("Something went wrong while fetching the data");
+
+          const data = await request.json();
+          console.log(data);
+
+          if (data.Response === "False") throw new Error("No movies found");
+          setMovies(data.Search);
+        
+
+      
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+      fetchData();},
+    [query]
+  );
 
   return (
     <>
-      <Navbar movies={movies} setMovies={setMovies} />
+      <Navbar
+        movies={movies}
+        setMovies={setMovies}
+        query={query}
+        setQuery={setQuery}
+      />
       <main className="main">
-        <MovieList movies={movies} />
+        {isLoading && <Loading />}
+        {error && <Errorpage error={error} />}
+        {!isLoading && !error && (
+          <MovieList
+            movies={movies}
+            setMovies={setMovies}
+            watched={watched}
+            setWatched={setWatched}
+          />
+        )}
+
 
         <MoviesInfo>
           <MovieSummary watched={watched} />

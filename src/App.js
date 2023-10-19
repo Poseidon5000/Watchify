@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
-import MovieList from "./components/MovieList";
+import MovieBox from "./components/MovieBox";
 import MoviesInfo from "./components/MoviesInfo";
+import MovieList from "./components/MovieList";
 import MovieSummary from "./components/MovieSummary";
 import MovieCard from "./components/MovieCard";
 import Loading from "./components/Loading";
 import Errorpage from "./components/Errorpage";
+import MovieDetails from "./components/MovieDetails";
+import NoMovie from "./components/NoMovie";
 const tempMovieData = [
   {
     imdbID: "tt1375666",
@@ -30,49 +33,63 @@ const tempMovieData = [
   },
 ];
 
-const tempWatchedData = [
-  {
-    imdbID: "tt1375666",
-    Title: "Inception",
-    Year: "2010",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-    runtime: 148,
-    imdbRating: 8.8,
-    userRating: 10,
-  },
-  {
-    imdbID: "tt0088763",
-    Title: "Back to the Future",
-    Year: "1985",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
-    runtime: 116,
-    imdbRating: 8.5,
-    userRating: 9,
-  },
-];
+// const tempWatchedData = [
+//   {
+//     imdbID: "tt1375666",
+//     Title: "Inception",
+//     Year: "2010",
+//     Poster:
+//       "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
+//     runtime: 148,
+//     imdbRating: 8.8,
+//     userRating: 10,
+//   },
+//   {
+//     imdbID: "tt0088763",
+//     Title: "Back to the Future",
+//     Year: "1985",
+//     Poster:
+//       "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
+//     runtime: 116,
+//     imdbRating: 8.5,
+//     userRating: 9,
+//   },
+// ];
 
 // const querys = "avatar";
 
 function App() {
   const [movies, setMovies] = useState(tempMovieData);
-  const [watched, setWatched] = useState(tempWatchedData);
-  const [query, setQuery] = useState("");
+  const [watched, setWatched] = useState([]);
+  const [query, setQuery] = useState("interstellar");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedId, setSelectedId] = useState(null);
+  
+
+  function handleSelectMovie(id) {
+    setSelectedId((selectedId) => (id === selectedId ? null : id));
+  }
+
+  function handleCloseMovie() {
+    setSelectedId(null);
+  }
+
+
+  function handleAddMovie(movie){
+    setWatched([...watched, movie])
+  }
 
   useEffect(
     function () {
       async function fetchData() {
-      try {
-        if (query.length < 3){
-          setMovies(tempMovieData);
-      
+        try {
+          if (query.length < 3) {
+            setMovies(tempMovieData);
 
-          return;
-        }
-        setError("");
+            return;
+          }
+          setError("");
           setIsLoading(true);
           const request = await fetch(
             `http://www.omdbapi.com/?s=${query}&apikey=c7015181`
@@ -82,20 +99,17 @@ function App() {
             throw new Error("Something went wrong while fetching the data");
 
           const data = await request.json();
-          console.log(data);
 
           if (data.Response === "False") throw new Error("No movies found");
           setMovies(data.Search);
-        
-
-      
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setIsLoading(false);
+        }
       }
-    }
-      fetchData();},
+      fetchData();
+    },
     [query]
   );
 
@@ -108,21 +122,35 @@ function App() {
         setQuery={setQuery}
       />
       <main className="main">
-        {isLoading && <Loading />}
-        {error && <Errorpage error={error} />}
-        {!isLoading && !error && (
-          <MovieList
-            movies={movies}
-            setMovies={setMovies}
-            watched={watched}
-            setWatched={setWatched}
-          />
-        )}
-
+        <MovieBox>
+          {!isLoading && !error && (
+            <MovieList
+              movies={movies}
+              setMovies={setMovies}
+              handleSelectMovie={handleSelectMovie}
+            />
+          )}
+          {isLoading && <Loading />}
+          {error && <Errorpage error={error} />}
+        </MovieBox>
 
         <MoviesInfo>
-          <MovieSummary watched={watched} />
-          <MovieCard watched={watched} setWatched={setWatched} />
+          {selectedId ? (
+            <MovieDetails
+              selectedId={selectedId}
+              handleCloseMovie={handleCloseMovie}
+              handleAddMovie = {handleAddMovie}
+              watched = {watched}
+            />
+          ) : (
+            <>
+            {watched.length === 0 ? <NoMovie/> : <MovieSummary watched={watched} />}
+            <MovieCard watched={watched} setWatched={setWatched} />
+            </>
+           
+          )}
+
+        
         </MoviesInfo>
       </main>
     </>

@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 
 
-const StarRating = ({color = "yellow"}) => {
+const StarRating = ({color = "yellow", setUserRating}) => {
   const [rating, setRating] = useState(0);
   const [tempRating, setTempRating] = useState(0)
 
   const styleStyling = {
     display: "flex",
     alignItems: "center",
-    gap: "10px",
+    gap: "15px",
   };
 
   const starContainer = {
@@ -16,24 +16,29 @@ const StarRating = ({color = "yellow"}) => {
     alignItems: "center",
   };
 
+function handleRating(rating){
+  setRating(rating)
+  setUserRating(rating)
+}
+
   
   return (
     <div style={styleStyling}>
       <div style={starContainer}>
         {Array.from({ length: 10 }, (_, i) => (
-          <Star color={color} key={i} onClick={() => setRating(i + 1)} full={tempRating ? tempRating >= i+ 1 : rating >= i +1}
+          <Star color={color} key={i} onClick={() =>handleRating(i + 1)} full={tempRating ? tempRating >= i+ 1 : rating >= i +1}
           hoverIn = {()=> setTempRating(i+1)}
           hoverOut = {()=> setTempRating(0)}/>
         ))}
       </div>
-      <div>{tempRating  || rating || ""}</div>
+      <div style={{fontSize:"16px"}}>{tempRating  || rating || ""}</div>
     </div>
   );
 };
 
 function Star({ onClick, full, hoverIn, hoverOut, color}) {
   const styleStyling = {
-    width: "20px",
+    width: "24px",
     height: "20px",
     cursor: "pointer",
   };
@@ -45,8 +50,8 @@ function Star({ onClick, full, hoverIn, hoverOut, color}) {
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
-          fill="yellow"
-          stroke="white"
+          fill="#fcc419"
+          stroke="#fcc419"
           onClick={onClick}
           
         >
@@ -57,7 +62,8 @@ function Star({ onClick, full, hoverIn, hoverOut, color}) {
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
-          stroke="#000"
+          stroke="#fcc419"
+          
           onClick={onClick}
         >
           <path
